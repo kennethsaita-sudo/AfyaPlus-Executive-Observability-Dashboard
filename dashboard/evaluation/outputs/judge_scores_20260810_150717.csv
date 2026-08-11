@@ -1,0 +1,31 @@
+﻿model,feature,correctness,groundedness,relevance,helpfulness,alignment
+llama3.1:8b,USSD,1,2.0,5,5,1
+llama3.1:8b,USSD,5,5.0,5,5,5
+llama3.1:8b,USSD,2,3.0,5,4,5
+llama3.1:8b,USSD,5,5.0,5,5,5
+llama3.1:8b,USSD,5,5.0,5,5,5
+llama3.1:8b,Mobile App,5,5.0,5,5,5
+llama3.1:8b,Mobile App,2,5.0,3,4,1
+llama3.1:8b,Mobile App,5,4.5,5,5,5
+llama3.1:8b,Mobile App,5,5.0,5,5,5
+llama3.1:8b,Mobile App,4,5.0,4,4,3
+llama3.1:8b,Web Portal,5,4.0,5,5,5
+llama3.1:8b,Web Portal,5,5.0,5,5,5
+llama3.1:8b,Web Portal,5,5.0,5,5,5
+llama3.1:8b,Web Portal,2,5.0,4,5,3
+llama3.1:8b,Web Portal,5,5.0,5,5,5
+mistral,USSD,5,5.0,5,5,5
+mistral,USSD,5,5.0,5,5,4
+mistral,USSD,5,5.0,5,5,5
+mistral,USSD,5,5.0,5,5,5
+mistral,USSD,5,5.0,5,5,5
+mistral,Mobile App,5,5.0,5,5,5
+mistral,Mobile App,5,5.0,5,5,5
+mistral,Mobile App,5,5.0,5,5,5
+mistral,Mobile App,5,5.0,5,5,3
+mistral,Mobile App,5,5.0,5,5,5
+mistral,Web Portal,5,5.0,5,5,5
+mistral,Web Portal,5,5.0,5,5,5
+mistral,Web Portal,5,5.0,5,5,5
+mistral,Web Portal,5,4.0,5,5,5
+mistral,Web Portal,5,5.0,5,5,5

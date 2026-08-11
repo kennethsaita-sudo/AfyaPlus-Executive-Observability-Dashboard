@@ -1,0 +1,7 @@
+﻿model,feature,quality_status,count
+llama3.1:8b,Mobile App,FAIL,5
+llama3.1:8b,USSD,FAIL,5
+llama3.1:8b,Web Portal,FAIL,5
+mistral,Mobile App,FAIL,5
+mistral,USSD,FAIL,5
+mistral,Web Portal,FAIL,5

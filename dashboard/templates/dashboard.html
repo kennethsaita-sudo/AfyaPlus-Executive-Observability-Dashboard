@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AfyaPlus Executive Observability Dashboard</title>
+    <style>
+        body {
+            font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+            background: #0f1117;
+            color: #e6e6e6;
+            margin: 0;
+            padding: 2rem;
+        }
+        h1 {
+            font-size: 1.6rem;
+            margin-bottom: 0.25rem;
+        }
+        .subtitle {
+            color: #9aa0a6;
+            margin-bottom: 2rem;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+            gap: 1.5rem;
+        }
+        .card {
+            background: #171a21;
+            border: 1px solid #262a33;
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+        }
+        .card h2 {
+            font-size: 1.05rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge.up { background: #16351f; color: #4ade80; }
+        .badge.down { background: #3a1620; color: #f87171; }
+        .badge.pass { background: #16351f; color: #4ade80; }
+        .badge.fail { background: #3a1620; color: #f87171; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        th, td {
+            text-align: left;
+            padding: 0.4rem 0.5rem;
+            border-bottom: 1px solid #262a33;
+        }
+        th { color: #9aa0a6; font-weight: 500; }
+        .no-data {
+            color: #9aa0a6;
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+        .progress-row { margin-bottom: 1rem; }
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 0.3rem;
+        }
+        .progress-track {
+            background: #262a33;
+            border-radius: 6px;
+            height: 10px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 6px;
+            background: #4ade80;
+        }
+        .progress-fill.over { background: #f87171; }
+        .stat-row {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .stat {
+            flex: 1;
+        }
+        .stat .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .stat .label {
+            font-size: 0.8rem;
+            color: #9aa0a6;
+        }
+        .footnote {
+            font-size: 0.75rem;
+            color: #676c76;
+            margin-top: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>AfyaPlus Executive Observability Dashboard</h1>
+    <p class="subtitle">Unified monitoring console — Phases 1–3 pulled live from disk</p>
+
+    <div class="grid">
+
+        <!-- SYSTEM HEALTH -->
+        <div class="card">
+            <h2>System Health <span class="badge up">UP</span></h2>
+            {% if quality.available %}
+                <div class="stat-row">
+                    <div class="stat">
+                        <div class="value">{{ quality.total_evaluated }}</div>
+                        <div class="label">Rows Evaluated</div>
+                    </div>
+                    <div class="stat">
+                        <div class="value">{{ quality.pass_count }}</div>
+                        <div class="label">Quality Gate Passes</div>
+                    </div>
+                    <div class="stat">
+                        <div class="value">{{ quality.fail_count }}</div>
+                        <div class="label">Quality Gate Failures</div>
+                    </div>
+                </div>
+                <p class="footnote">
+                    "Exception count" here is approximated as quality gate
+                    FAILures, since evaluate.py currently only prints caught
+                    API/runtime exceptions to console rather than logging
+                    them to a file. To track true runtime exceptions
+                    separately, extend evaluate.py's except block to append
+                    failures to a CSV/JSON log.
+                </p>
+            {% else %}
+                <p class="no-data">No evaluation data found. Run evaluation/evaluate.py first.</p>
+            {% endif %}
+        </div>
+
+        <!-- FEATURE QUALITY MATRIX -->
+        <div class="card">
+            <h2>Feature Quality Matrix</h2>
+            {% if quality.available %}
+                <table>
+                    <tr>
+                        <th>Model</th><th>Feature</th><th>ROUGE-L</th>
+                        <th>Token F1</th><th>Alignment</th><th>Status</th>
+                    </tr>
+                    {% for row in quality.rows %}
+                    <tr>
+                        <td>{{ row.model }}</td>
+                        <td>{{ row.feature }}</td>
+                        <td>{{ "%.3f"|format(row.rouge_l) }}</td>
+                        <td>{{ "%.3f"|format(row.token_f1) }}</td>
+                        <td>{{ "%.2f"|format(row.alignment) }}</td>
+                        <td>
+                            <span class="badge {{ 'pass' if row.quality_status == 'PASS' else 'fail' }}">
+                                {{ row.quality_status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p class="no-data">No evaluation data found. Run evaluation/evaluate.py first.</p>
+            {% endif %}
+
+            <h3 style="font-size:0.95rem; margin-top:1.25rem;">Current Model Routing</h3>
+            {% if routing.available %}
+                <table>
+                    <tr><th>Feature</th><th>Recommended Model</th><th>Note</th></tr>
+                    {% for row in routing.rows %}
+                    <tr>
+                        <td>{{ row.feature }}</td>
+                        <td>{{ row.recommended_model }}</td>
+                        <td>{{ row.note }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            {% else %}
+                <p class="no-data">No routing data found. Run cost/savings_analysis.py first.</p>
+            {% endif %}
+        </div>
+
+        <!-- DRIFT VECTOR STATUS -->
+        <div class="card">
+            <h2>Drift Vector Status</h2>
+            {% if drift.available and drift.latest_month %}
+                <p style="font-size:0.85rem; color:#9aa0a6;">
+                    Most recent simulated month (Month {{ drift.latest_month.month }}):
+                </p>
+                <table>
+                    <tr><th>Metric</th><th>Mean</th></tr>
+                    <tr><td>ROUGE-L</td><td>{{ "%.3f"|format(drift.latest_month.rouge_l_mean) }}</td></tr>
+                    <tr><td>Latency (ms)</td><td>{{ "%.0f"|format(drift.latest_month.latency_ms_mean) }}</td></tr>
+                    <tr><td>Input Token Length</td><td>{{ "%.0f"|format(drift.latest_month.input_token_length_mean) }}</td></tr>
+                </table>
+
+                {% if drift.alert_log %}
+                    <h3 style="font-size:0.95rem; margin-top:1.25rem;">Alert Status</h3>
+                    {% if drift.alert_log.first_drift_detected %}
+                        <p>
+                            <span class="badge fail">DRIFT DETECTED</span>
+                            Month {{ drift.alert_log.alert.month }},
+                            column <code>{{ drift.alert_log.alert.column }}</code>
+                            (p={{ "%.4f"|format(drift.alert_log.alert.p_value) }})
+                        </p>
+                    {% else %}
+                        <p><span class="badge pass">NO DRIFT DETECTED</span></p>
+                    {% endif %}
+                {% endif %}
+            {% else %}
+                <p class="no-data">No drift data found. Run drift/generate_monthly_data.py then drift/drift_detector.py first.</p>
+            {% endif %}
+        </div>
+
+        <!-- BUDGET CAPITAL UTILISATION -->
+        <div class="card">
+            <h2>Budget Capital Utilisation</h2>
+            {% if cost.available %}
+                <div class="progress-row">
+                    <div class="progress-label">
+                        <span>Daily spend: ${{ cost.daily_avg_usd }} / ${{ cost.daily_cap_usd }} cap</span>
+                        <span>{{ cost.daily_pct }}%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill {{ 'over' if cost.daily_over_cap else '' }}"
+                             style="width: {{ cost.daily_pct }}%;"></div>
+                    </div>
+                </div>
+                <div class="progress-row">
+                    <div class="progress-label">
+                        <span>30-day spend: ${{ cost.total_30day_usd }} / ${{ cost.monthly_cap_usd }} cap</span>
+                        <span>{{ cost.monthly_pct }}%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill {{ 'over' if cost.monthly_over_cap else '' }}"
+                             style="width: {{ cost.monthly_pct }}%;"></div>
+                    </div>
+                </div>
+                <p class="footnote">
+                    Caps (${{ cost.daily_cap_usd }}/day, ${{ cost.monthly_cap_usd }}/month) are
+                    placeholder assumptions set in dashboard/app.py — replace with your
+                    organisation's actual budget caps.
+                </p>
+            {% else %}
+                <p class="no-data">No cost data found. Run cost/simulate_costs.py first.</p>
+            {% endif %}
+        </div>
+
+    </div>
+
+</body>
+</html>

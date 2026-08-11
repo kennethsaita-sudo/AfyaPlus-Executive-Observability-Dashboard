@@ -1,0 +1,23 @@
+{
+  "first_drift_detected": true,
+  "alert": {
+    "month": 2,
+    "column": "rouge_l",
+    "ks_statistic": 0.796,
+    "p_value": 0.0,
+    "test": "two-sample Kolmogorov-Smirnov",
+    "threshold": 0.05
+  },
+  "checked_months": [
+    1,
+    2,
+    3
+  ],
+  "checked_columns": [
+    "rouge_l",
+    "latency_ms",
+    "input_token_length"
+  ],
+  "test": "two-sample Kolmogorov-Smirnov, each month vs. Month 1 baseline",
+  "significance_threshold": 0.05
+}
